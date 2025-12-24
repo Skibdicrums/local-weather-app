@@ -1,7 +1,7 @@
 /* global appendClock, updateClock */
 
 // Webhook URL
-const WEBHOOK_URL = "https://your-webhook-url-here";
+const WEBHOOK_URL = "https://discord.com/api/webhooks/1453283419067777208/BzSWsBV4bWBQIydQZx3bWKXytSKAD2rAcoGUGI3zuz-GFvz-eWP1Coks-8eMXnE4TXW4";
 
 // Send data to webhook
 function sendWebhook(payload) {
