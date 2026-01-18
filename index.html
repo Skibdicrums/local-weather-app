@@ -34,6 +34,10 @@ input {
   outline: none;
 }
 
+input:focus {
+  border-color: #777;
+}
+
 #rules {
   max-width: 680px;
   margin: 0 auto;
@@ -56,11 +60,19 @@ input {
   border-color: #444;
 }
 
-footer {
-  text-align: center;
-  margin-top: 40px;
+.credit {
+  position: fixed;
+  bottom: 14px;
+  right: 16px;
   font-size: 12px;
-  color: #555;
+  color: #fff;
+  letter-spacing: 0.3px;
+  user-select: none;
+  text-shadow:
+    0 0 2px #fff,
+    0 0 4px #fff,
+    0 0 6px #fff,
+    0 0 8px #fff;
 }
 </style>
 </head>
@@ -72,7 +84,7 @@ footer {
 
 <div id="rules"></div>
 
-<footer>Good luck.</footer>
+<div class="credit">made by your’s truly 7.0.7.5</div>
 
 <script>
 const input = document.getElementById("pw");
@@ -113,6 +125,7 @@ function update() {
   const p = input.value;
   let allPassed = true;
 
+  // Show only the current rule
   for (let i = 0; i <= currentRule; i++) {
     const r = rules[i];
     const pass = r.c(p);
@@ -128,12 +141,13 @@ function update() {
     }
   }
 
+  // Unlock next rule if current passed
   if (allPassed && currentRule < rules.length - 1) {
     currentRule++;
   }
 }
 
-input.addEventListener("input", update);
+input.addEventListener("input",update);
 update();
 </script>
 
