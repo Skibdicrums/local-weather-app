@@ -12,13 +12,12 @@ body {
   padding: 32px 16px;
   background: #000;
   color: #eaeaea;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
 
 h1 {
   text-align: center;
   font-weight: 500;
-  letter-spacing: 0.5px;
   margin-bottom: 24px;
 }
 
@@ -35,10 +34,6 @@ input {
   outline: none;
 }
 
-input:focus {
-  border-color: #777;
-}
-
 #rules {
   max-width: 680px;
   margin: 0 auto;
@@ -49,11 +44,10 @@ input:focus {
   margin-bottom: 8px;
   border: 1px solid #222;
   font-size: 14px;
-  line-height: 1.4;
 }
 
 .rule.pass {
-  color: #777;
+  color: #666;
   border-color: #111;
 }
 
@@ -101,44 +95,45 @@ const rules = [
   {t:"Does not contain the word 'password'",c:p=>!/password/i.test(p)},
   {t:"Contains a repeated character",c:p=>/(.)\1/.test(p)},
   {t:"Contains a prime digit",c:p=>(p.match(/\d/g)||[]).some(d=>[2,3,5,7].includes(+d))},
-  {t:"Contains a color",c:p=>/(red|blue|green|yellow|purple|black|white)/i.test(p)},
   {t:"Contains a weekday",c:p=>/(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/i.test(p)},
   {t:"Exactly two emojis",c:p=>(p.match(/\p{Extended_Pictographic}/gu)||[]).length===2},
-  {t:"Contains a math symbol",c:p=>/[+\-*/=]/.test(p)},
-  {t:"Contains a country",c:p=>/(usa|china|india|france|germany|japan|brazil)/i.test(p)},
-  {t:"Password longer than rule count",c:p=>p.length>active.length},
-  {t:"Contains a year after 2000",c:p=>(p.match(/\d{4}/)||[]).some(y=>+y>=2000)},
-  {t:"Contains a currency symbol",c:p=>/[$€£¥]/.test(p)},
-  {t:"Contains a unit of time",c:p=>/(second|minute|hour|day|week|year)/i.test(p)},
-  {t:"Contains a planet",c:p=>/(mars|earth|venus|jupiter|saturn)/i.test(p)},
-  {t:"Contains a chess piece",c:p=>/(king|queen|rook|bishop|knight|pawn)/i.test(p)},
+  {t:"Password longer than rule count",c:p=>p.length>currentRule},
   {t:"Fire must stay alive (type 🔥)",c:p=>{
     if(p.includes("🔥")) fire=Math.min(10,fire+1);
     fire--;
     return fire>0;
   }},
-  {t:"All previous rules must stay valid",c:p=>active.every(r=>r.c(p))}
+  {t:"All previous rules must stay valid",c:p=>true}
 ];
 
-let active = [];
+let currentRule = 0;
 
-function update(){
-  rulesDiv.innerHTML="";
-  const p=input.value;
+function update() {
+  rulesDiv.innerHTML = "";
+  const p = input.value;
+  let allPassed = true;
 
-  rules.forEach((r,i)=>{
-    if(i<=active.length && !active.includes(r)) active.push(r);
-  });
+  for (let i = 0; i <= currentRule; i++) {
+    const r = rules[i];
+    const pass = r.c(p);
 
-  active.forEach(r=>{
-    const d=document.createElement("div");
-    d.className="rule "+(r.c(p)?"pass":"fail");
-    d.textContent=r.t;
+    const d = document.createElement("div");
+    d.className = "rule " + (pass ? "pass" : "fail");
+    d.textContent = r.t;
     rulesDiv.appendChild(d);
-  });
+
+    if (!pass) {
+      allPassed = false;
+      break;
+    }
+  }
+
+  if (allPassed && currentRule < rules.length - 1) {
+    currentRule++;
+  }
 }
 
-input.addEventListener("input",update);
+input.addEventListener("input", update);
 update();
 </script>
 
