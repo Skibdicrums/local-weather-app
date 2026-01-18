@@ -1,39 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="author" content="Adam Fields">
-    <meta name="description" content="">
-    <meta name="keywords" content="html,css,bootstrap,javascript,jquery">
-    <title>Today | Local Time and Weather</title>
-    <link rel="icon" href="favicon/favicon.ico">
-    <link rel="stylesheet" type="text/css" href="lib/css/bootstrap-4.0.0-alpha.6.min.css">
-    <link rel="stylesheet" type="text/css" href="css/style.css">
-    <script type="text/javascript" src="lib/js/zepto-1.2.0.min.js"></script>
-    <script type="text/javascript" src="lib/js/moment-2.18.1.min.js"></script>
-    <script type="text/javascript" src="lib/js/skycons.js"></script>
-  </head>
-  <body class="bg-inverse">
-    <div class="jumbotron bg-inverse text-center text-white pb-0">
-      <h1 class="display-4 text-primary mb-4">Today</h1>
-      <div id="clock"></div>
-      <p id="time"></p>
-      <h4 id="loading">Loading</h4>
-    </div>
-    <div class="container" id="main"></div>
-    <footer class="footer">
-      <div class="container">
-        <span class="text-muted">Powered by <a href="https://darksky.net/poweredby" target="_blank">Dark Sky</a></span>
-      </div>
-    </footer>
-    <script type="text/javascript" src="js/modules/times.js"></script>
-    <script type="text/javascript" src="js/modules/appendClock.js"></script>
-    <script type="text/javascript" src="js/modules/updateClock.js"></script>
-    <script type="text/javascript" src="js/modules/api.js"></script>
-    <script type="text/javascript" src="js/modules/forecast.js"></script>
-    <script type="text/javascript" src="js/modules/success.js"></script>
-    <script type="text/javascript" src="js/modules/error.js"></script>
-    <script type="text/javascript" src="js/main.js"></script>
-  </body>
+<head>
+<meta charset="UTF-8">
+<title>The Password Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 32px 16px;
+  background: #000;
+  color: #eaeaea;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+}
+
+h1 {
+  text-align: center;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  margin-bottom: 24px;
+}
+
+input {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto 28px;
+  display: block;
+  padding: 14px 16px;
+  font-size: 17px;
+  background: #000;
+  color: #fff;
+  border: 1px solid #333;
+  outline: none;
+}
+
+input:focus {
+  border-color: #777;
+}
+
+#rules {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.rule {
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  border: 1px solid #222;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.rule.pass {
+  color: #777;
+  border-color: #111;
+}
+
+.rule.fail {
+  color: #fff;
+  border-color: #444;
+}
+
+footer {
+  text-align: center;
+  margin-top: 40px;
+  font-size: 12px;
+  color: #555;
+}
+</style>
+</head>
+<body>
+
+<h1>The Password Game</h1>
+
+<input id="pw" placeholder="Enter password" autocomplete="off">
+
+<div id="rules"></div>
+
+<footer>Good luck.</footer>
+
+<script>
+const input = document.getElementById("pw");
+const rulesDiv = document.getElementById("rules");
+
+let fire = 10;
+
+const rules = [
+  {t:"At least 5 characters",c:p=>p.length>=5},
+  {t:"Contains a number",c:p=>/\d/.test(p)},
+  {t:"Contains an uppercase letter",c:p=>/[A-Z]/.test(p)},
+  {t:"Contains a lowercase letter",c:p=>/[a-z]/.test(p)},
+  {t:"Contains a special character",c:p=>/[^a-zA-Z0-9]/.test(p)},
+  {t:"Digits add up to 10",c:p=>(p.match(/\d/g)||[]).reduce((a,b)=>a+ +b,0)===10},
+  {t:"Contains a month",c:p=>/(january|february|march|april|may|june|july|august|september|october|november|december)/i.test(p)},
+  {t:"Contains a Roman numeral",c:p=>/(I|V|X|L|C|D|M)/.test(p)},
+  {t:"Contains an emoji",c:p=>/\p{Extended_Pictographic}/u.test(p)},
+  {t:"Length is even",c:p=>p.length%2===0},
+  {t:"At least three vowels",c:p=>(p.match(/[aeiou]/gi)||[]).length>=3},
+  {t:"Does not contain the word 'password'",c:p=>!/password/i.test(p)},
+  {t:"Contains a repeated character",c:p=>/(.)\1/.test(p)},
+  {t:"Contains a prime digit",c:p=>(p.match(/\d/g)||[]).some(d=>[2,3,5,7].includes(+d))},
+  {t:"Contains a color",c:p=>/(red|blue|green|yellow|purple|black|white)/i.test(p)},
+  {t:"Contains a weekday",c:p=>/(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/i.test(p)},
+  {t:"Exactly two emojis",c:p=>(p.match(/\p{Extended_Pictographic}/gu)||[]).length===2},
+  {t:"Contains a math symbol",c:p=>/[+\-*/=]/.test(p)},
+  {t:"Contains a country",c:p=>/(usa|china|india|france|germany|japan|brazil)/i.test(p)},
+  {t:"Password longer than rule count",c:p=>p.length>active.length},
+  {t:"Contains a year after 2000",c:p=>(p.match(/\d{4}/)||[]).some(y=>+y>=2000)},
+  {t:"Contains a currency symbol",c:p=>/[$€£¥]/.test(p)},
+  {t:"Contains a unit of time",c:p=>/(second|minute|hour|day|week|year)/i.test(p)},
+  {t:"Contains a planet",c:p=>/(mars|earth|venus|jupiter|saturn)/i.test(p)},
+  {t:"Contains a chess piece",c:p=>/(king|queen|rook|bishop|knight|pawn)/i.test(p)},
+  {t:"Fire must stay alive (type 🔥)",c:p=>{
+    if(p.includes("🔥")) fire=Math.min(10,fire+1);
+    fire--;
+    return fire>0;
+  }},
+  {t:"All previous rules must stay valid",c:p=>active.every(r=>r.c(p))}
+];
+
+let active = [];
+
+function update(){
+  rulesDiv.innerHTML="";
+  const p=input.value;
+
+  rules.forEach((r,i)=>{
+    if(i<=active.length && !active.includes(r)) active.push(r);
+  });
+
+  active.forEach(r=>{
+    const d=document.createElement("div");
+    d.className="rule "+(r.c(p)?"pass":"fail");
+    d.textContent=r.t;
+    rulesDiv.appendChild(d);
+  });
+}
+
+input.addEventListener("input",update);
+update();
+</script>
+
+</body>
 </html>
